@@ -22,13 +22,13 @@ jobs:
       run: go build -o myapp .  # Build your Go app
 
     - name: Log in to Docker Hub
-      run: echo "${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
+      run: echo "${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}" |sudo  docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
 
     - name: Build Docker image
-      run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:latest .
+      run: sudo docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:latest .
 
     - name: Push Docker image to Docker Hub
-      run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:latest
+      run: sudo docker push ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:latest
 
   deploy-to-ec2:
     runs-on: ubuntu-latest
