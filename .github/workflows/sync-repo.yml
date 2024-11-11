@@ -3,32 +3,47 @@ name: Sync with Friend's Repo
 on:
   schedule:
     - cron: '*/5 * * * *'  # Runs every 5 minutes
+  push:
+    branches:
+      - main  # Trigger on push to the main branch, adjust as needed.
 
 jobs:
   sync:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        ref: main  # Ensure we're working on the correct branch (main in this case)
 
-      - name: Set up Git
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
+    - name: Set up Git
+      run: |
+        git config --global user.name '20BQ1A0458'
+        git config --global user.email '20bq1a0458@vvit.net'
 
-      - name: Add Friend's Repo as Remote
-        run: git remote add friend_repo https://github.com/karankumarsahu/wireguard_server_test.git
+    - name: Add friend’s repo as remote
+      run: |
+        git remote add friend https://github.com/karankumarsahu/wireguard_server_test.git
+        git fetch friend
 
-      - name: Fetch Changes from Friend's Repo
-        run: git fetch friend_repo
+    - name: Merge changes from friend's repo into my repo
+      run: |
+        git checkout main  # Ensure you're on the main branch (or another branch as needed)
+        git pull friend main  # Pull from friend's main branch into your branch
 
-      - name: Merge Changes from Friend's Repo
-        run: |
-          git checkout main
-          git merge --no-ff friend_repo/main || echo "Merge conflict, proceeding with rebase instead"
-          git rebase friend_repo/main || echo "Rebase failed, skipping..."
+    - name: Automatically resolve conflicts (choose friend’s version)
+      run: |
+        # If there are conflicts, we resolve them by choosing the friend's version
+        git diff --name-only --diff-filter=U | while read file; do
+          git checkout --theirs "$file"  # Accept changes from friend's repo
+          git add "$file"  # Stage the resolved file
+        done
 
-      - name: Push Changes to Repo 2
-        run: git push origin main
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Commit the changes if there were any
+      run: |
+        git commit -m "Automated sync with friend's repo" || echo "No changes to commit"
+
+    - name: Push the changes to my repo
+      run: |
+        git push origin main --force-with-lease  # Ensure safe force push
