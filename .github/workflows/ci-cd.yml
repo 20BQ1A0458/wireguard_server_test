@@ -12,12 +12,11 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
-      
-- name: Set up Go
-  uses: actions/setup-go@v3
-  with:
-    go-version: '1.23'  # Change this to match the version in go.mod
 
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: '1.23'  # Change this to match the version in go.mod
 
     - name: Build Go application
       run: go build -o myapp .  # Build your Go app
