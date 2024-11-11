@@ -44,4 +44,4 @@ jobs:
           sudo docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:latest
           sudo docker stop myapp || true
           sudo docker rm myapp || true
-          sudo docker run -d --name myapp -p 80:8080 ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:latest
+          sudo docker run -d --name myapp -p 80:7000 ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:latest
