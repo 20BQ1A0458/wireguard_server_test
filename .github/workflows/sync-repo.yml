@@ -20,14 +20,15 @@ jobs:
 
       - name: Add upstream remote (repo-1)
         run: |
+          git remote remove upstream || true  # Remove if it exists
           git remote add upstream https://github.com/karankumarsahu/wireguard_server_test.git
           git fetch upstream
 
       - name: Merge changes from repo-1/main into repo-2/main
         run: |
           git checkout main
-          git pull upstream main   # Fetch and merge changes from repo-1
-          git push origin main     # Push those changes to your forked repository (repo-2)
+          git pull upstream main --strategy-option=theirs  # Auto-resolve conflicts if needed
+          git push origin main
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}  # Use the secret token to authenticate
 
