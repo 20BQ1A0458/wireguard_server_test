@@ -30,7 +30,7 @@ jobs:
     - name: Merge changes from friend's repo into my repo
       run: |
         git checkout main  # Ensure you're on the main branch (or another branch as needed)
-        git pull friend main --no-rebase  # Automatically merge changes, avoiding rebase
+        git pull friend main --allow-unrelated-histories --no-rebase  # Allow unrelated histories and merge
 
     - name: Automatically resolve conflicts (choose friend’s version)
       run: |
