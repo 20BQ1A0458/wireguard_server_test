@@ -1,49 +1,45 @@
-name: Sync with Friend's Repo
+name: Sync with upstream
 
 on:
   schedule:
-    - cron: '*/5 * * * *'  # Runs every 5 minutes
+    - cron: "*/5 * * * *"  # Run every hour; adjust as needed
   push:
     branches:
-      - main  # Trigger on push to the main branch, adjust as needed.
+      - main  # Run on push to the main branch
+  pull_request:
+    branches:
+      - main  # Run on pull request targeting the main branch
 
 jobs:
   sync:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-      with:
-        ref: main  # Ensure we're working on the correct branch (main in this case)
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
     - name: Set up Git
       run: |
         git config --global user.name '20BQ1A0458'
         git config --global user.email '20bq1a0458@vvit.net'
+    - name: Add upstream remote
+      run: git remote add upstream https://github.com/karankumarsahu/wireguard_server_test.git
 
-    - name: Add friend’s repo as remote
-      run: |
-        git remote add friend https://github.com/karankumarsahu/wireguard_server_test.git
-        git fetch friend
+    - name: Fetch upstream changes
+      run: git fetch upstream
 
-    - name: Merge changes from friend's repo into my repo
+    - name: Merge upstream changes (preserve local commits)
       run: |
-        git checkout main  # Ensure you're on the main branch (or another branch as needed)
-        git pull friend main --allow-unrelated-histories --no-rebase  # Allow unrelated histories and merge
+        git checkout main
+        # Fetch the latest upstream changes
+        git merge upstream/main --strategy=recursive -X theirs --no-edit --allow-unrelated-histories || echo "Merge conflicts, skipping changes"
+    - name: Push changes to fork (if changes were made)
+      run: |
+        git push origin main
+      env:
+        GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
 
-    - name: Automatically resolve conflicts (choose friend’s version)
+    - name: Trigger the CI/CD pipeline
       run: |
-        # If there are conflicts, we resolve them by choosing the friend's version
-        git diff --name-only --diff-filter=U | while read file; do
-          git checkout --theirs "$file"  # Accept changes from friend's repo
-          git add "$file"  # Stage the resolved file
-        done
-
-    - name: Commit the changes if there were any
-      run: |
-        git commit -m "Automated sync with friend's repo" || echo "No changes to commit"
-
-    - name: Push the changes to my repo
-      run: |
-        git push origin main --force-with-lease  # Ensure safe force push
+        curl -X POST -u "${{ secrets.MY_GITHUB_TOKEN }}" \
+          -d '{"event_type": "sync-complete"}' \
+          "https://api.github.com/repos/${{ github.repository }}/dispatches"
