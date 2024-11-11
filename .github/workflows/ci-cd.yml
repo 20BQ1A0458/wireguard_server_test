@@ -45,5 +45,5 @@ jobs:
               sudo docker stop wireguard-test
               sudo docker rm wireguard-test
             fi
-            sudo docker run -d --name wireguard-test -p 80:7000 ${{ secrets.DOCKER_USERNAME }}/wireguard-test:latest
+            sudo docker run -d --name wireguard-test -p 8080:8000 ${{ secrets.DOCKER_USERNAME }}/wireguard-test:latest
           EOF
