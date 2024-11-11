@@ -45,7 +45,7 @@ jobs:
         uses: docker/setup-buildx-action@v2
 
       # Step 2: Copy SSH Key for authentication
-      - name: Copy SSH Key
+      - name: Copy SSH Key 
         uses: webfactory/ssh-agent@v0.5.3
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
