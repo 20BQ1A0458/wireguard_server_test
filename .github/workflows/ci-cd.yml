@@ -40,20 +40,29 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Copy SSH Key for authentication
+      # Step 1: Set up Docker (if not already available)
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v2
+
+      # Step 2: Copy SSH Key for authentication
       - name: Copy SSH Key
         uses: webfactory/ssh-agent@v0.5.3
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      # Step 2: Deploy to Ubuntu Server
+      # Step 3: Deploy to Ubuntu Server
       - name: Deploy to Ubuntu Server
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            # Pull the latest Docker image
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/wireguard-test:latest
+
+            # Check if the container is running, stop and remove it if necessary
             if sudo docker ps -q -f name=wireguard-test; then
               sudo docker stop wireguard-test
               sudo docker rm wireguard-test
             fi
-            sudo docker run -d --name wireguard-test -p 80:7000 ${{ secrets.DOCKER_USERNAME }}/wireguard-test:latest
+
+            # Run the new container with environment variables for flexibility
+            sudo docker run -d --name wireguard-test -p ${PORT:-80}:7000 ${{ secrets.DOCKER_USERNAME }}/wireguard-test:latest
           EOF
