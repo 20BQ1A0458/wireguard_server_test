@@ -1,0 +1,38 @@
+name: Sync Fork with Main Repository
+
+on:
+  push:
+    branches:
+      - main   # This triggers when there are changes to the `main` branch in repo-1
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo-2 (Your Forked Repository)
+        uses: actions/checkout@v2
+
+      - name: Set up Git
+        run: |
+          git config user.name "20BQ1A0458"
+          git config user.email "20bq1a0458@vvit.net"
+
+      - name: Add upstream remote (repo-1)
+        run: |
+          git remote add upstreamhttps://github.com/karankumarsahu/wireguard_server_test.git
+          git fetch upstream
+
+      - name: Merge changes from repo-1/main into repo-2/main
+        run: |
+          git checkout main
+          git pull upstream main   # Fetch and merge changes from repo-1
+          git push origin main     # Push those changes to your forked repository (repo-2)
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}  # Use the secret token to authenticate
+
+      - name: Push changes to repo-2 (Your Fork)
+        run: |
+          git push origin main   # Ensure any merged changes are pushed to repo-2
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}  # Use the secret token for authentication
