@@ -20,7 +20,7 @@ jobs:
 
       - name: Add upstream remote (repo-1)
         run: |
-          git remote add upstreamhttps://github.com/karankumarsahu/wireguard_server_test.git
+          git remote add upstream https://github.com/karankumarsahu/wireguard_server_test.git
           git fetch upstream
 
       - name: Merge changes from repo-1/main into repo-2/main
