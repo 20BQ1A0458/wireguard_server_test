@@ -1,37 +1,25 @@
-name: Sync Fork with Main Repository
+name: Sync with Friend's Repo
 
 on:
-  push:
-    branches:
-      - main   # This triggers when there are changes to the `main` branch in repo-1
+  schedule:
+    - cron: '*/5 * * * *'  # Runs every 5 minutes
 
 jobs:
   sync:
     runs-on: ubuntu-latest
-
     steps:
-      # Step 1: Checkout repo-2 (Your Forked Repository)
-      - name: Checkout repo-2 (Your Forked Repository)
+      - name: Checkout Repo
         uses: actions/checkout@v2
 
-      # Step 2: Set up Git
-      - name: Set up Git
-        run: |
-          git config user.name "20BQ1A0458"
-          git config user.email "20bq1a0458@vvit.net"
+      - name: Add Friend's Repo as Remote
+        run: git remote add friend_repo https://github.com/karankumarsahu/wireguard_server_test.git
 
-      # Step 3: Add upstream remote (repo-1)
-      - name: Add upstream remote (repo-1)
+      - name: Fetch and Merge Changes from Friend's Repo
         run: |
-          git remote remove upstream || true  # Remove if it exists
-          git remote add upstream https://github.com/karankumarsahu/wireguard_server_test.git
-          git fetch upstream
-
-      # Step 4: Merge changes from repo-1/main into repo-2/main
-      - name: Merge changes from repo-1/main into repo-2/main
-        run: |
-          git checkout main
-          git pull upstream main --no-rebase --allow-unrelated-histories  # Merge without rebasing and allow unrelated histories
-          git push origin main     # Push those changes to your forked repository (repo-2)
+          git fetch friend_repo
+          git merge friend_repo/main
+          
+      - name: Push Changes to Repo 2
+        run: git push origin main
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}  # Use the secret token to authenticate
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
