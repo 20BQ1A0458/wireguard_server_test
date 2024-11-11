@@ -27,8 +27,8 @@ jobs:
       - name: Merge changes from repo-1/main into repo-2/main
         run: |
           git checkout main
-          git pull upstream main --strategy-option=theirs  # Auto-resolve conflicts if needed
-          git push origin main
+          git pull upstream main --strategy-option=theirs   # Auto-resolve conflicts by keeping upstream changes
+          git push origin main   # Push those changes to your forked repository (repo-2)
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}  # Use the secret token to authenticate
 
