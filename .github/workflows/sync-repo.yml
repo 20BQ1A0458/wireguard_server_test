@@ -11,14 +11,23 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v2
 
+      - name: Set up Git
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
       - name: Add Friend's Repo as Remote
         run: git remote add friend_repo https://github.com/karankumarsahu/wireguard_server_test.git
 
-      - name: Fetch and Merge Changes from Friend's Repo
+      - name: Fetch Changes from Friend's Repo
+        run: git fetch friend_repo
+
+      - name: Merge Changes from Friend's Repo
         run: |
-          git fetch friend_repo
-          git merge friend_repo/main
-          
+          git checkout main
+          git merge --no-ff friend_repo/main || echo "Merge conflict, proceeding with rebase instead"
+          git rebase friend_repo/main || echo "Rebase failed, skipping..."
+
       - name: Push Changes to Repo 2
         run: git push origin main
         env:
