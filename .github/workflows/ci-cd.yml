@@ -2,7 +2,7 @@ name: CI/CD Pipeline for Go Application
 
 on:
   repository_dispatch:
-    types: [sync-complete]  # Trigger only on sync-complete event
+    types: [sync-complete]  # Trigger only on sync-complete eventr
 
 jobs:
   build:
