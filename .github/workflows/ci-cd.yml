@@ -1,13 +1,13 @@
 name: CI/CD Pipeline for Go Application
 
 on:
-  push:
-    branches:
-      - main
+  repository_dispatch:
+    types: [sync-complete]  # Trigger only on sync-complete eventr
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Check out the code
         uses: actions/checkout@v3
@@ -24,39 +24,13 @@ jobs:
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/wireguard-test:latest .
           docker tag ${{ secrets.DOCKER_USERNAME }}/wireguard-test:latest ${{ secrets.DOCKER_USERNAME }}/wireguard-test:latest
-
       - name: Push Docker Image to Docker Hub
         run: |
           docker push ${{ secrets.DOCKER_USERNAME }}/wireguard-test:latest
-
-  deploy_minikube:
+  deploy:
     needs: build
     runs-on: ubuntu-latest
-    steps:
-      - name: Install kubectl
-        run: |
-          curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
-          chmod +x ./kubectl
-          sudo mv ./kubectl /usr/local/bin/kubectl
 
-      - name: Set up Minikube
-        run: |
-          curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
-          chmod +x minikube
-          sudo install minikube /usr/local/bin/
-          sudo minikube start --driver=none
-
-      - name: Deploy to Minikube
-        run: |
-          kubectl create deployment wireguard-test --image=${{ secrets.DOCKER_USERNAME }}/wireguard-test:latest
-          kubectl expose deployment wireguard-test --type=NodePort --port=8000
-
-      - name: Check Deployment Status on Minikube
-        run: kubectl get pods
-
-  deploy_ubuntu:
-    needs: build
-    runs-on: ubuntu-latest
     steps:
       - name: Copy SSH Key
         uses: webfactory/ssh-agent@v0.5.3
